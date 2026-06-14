@@ -16,6 +16,7 @@ sb_rando.py has a few settings at the top if you open it in a text editor
 CREDIT :
 jummy made this.
 game folder is built upon "Speedy Blupi 2 Remastered" by Jesse Savoie
+Blupi and original game assets © Daniel Roux & Epsitec SA
 
 LISENCE :
-CC BY-NC-SA 4.0
+CC BY-NC-SA 4.0 (python source files)
