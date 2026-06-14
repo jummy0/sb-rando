@@ -1,4 +1,5 @@
 # unimplemented
+from enum import *
 
 class GameVersion(Enum):
 	SB_DEMO_08 = 1

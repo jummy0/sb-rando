@@ -10,13 +10,12 @@ RANDOMIZE_SOUNDS = False
 PROCESS_BACKGROUNDS = True
 PROCESS_MUSICS = True
 PROCESS_MISSIONS = True
-SEED = 1
+SEED = 0
 
 import random, sb_util, shutil
 from pathlib import Path
 from PIL import Image
 from enum import *
-
 
 # sb_util.audit_block_data()
 # exit()
