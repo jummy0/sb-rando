@@ -39,7 +39,7 @@ def randomize_blupi_color():
     colors = []
     for i in range(4):
         bands_i = bands.copy()
-        colors[i] = (random.random(), random.random(), random.random())
+        colors.append((random.random(), random.random(), random.random()))
         for j in range(3):
             bands_i[j] = bands_i[j].point(lambda x: x * colors[i][j])
 

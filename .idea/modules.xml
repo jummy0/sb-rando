@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/sb-rando-dist.iml" filepath="$PROJECT_DIR$/.idea/sb-rando-dist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/sb-rando.iml" filepath="$PROJECT_DIR$/.idea/sb-rando.iml" />
     </modules>
   </component>
 </project>
