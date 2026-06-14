@@ -1,0 +1,5 @@
+game/image/*
+game/sound/*
+game/GLCache/*
+game/data/*.blp
+game/data/*.xch
