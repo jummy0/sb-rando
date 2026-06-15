@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/game/GLCache/92437e720c0f45ab1d34671959ebb2d1" />
+      <excludeFolder url="file://$MODULE_DIR$/game/GLCache/94cbba437ecd245d12b0341642feb8f6" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (sb-rando) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -40,12 +40,25 @@ table_adapt_decor = (
     0x183, 0x183, 0x182, 0x182,
     0x18a, 0x18a, 0x188, 0x188,
     0x18b, 0x18b, 0x189, 0x189,
-    0x18d, 0x18d, 0x18c, 0x18d,
+    0x18d, 0x18d, 0x18c, 0x18c,
 
     0xfb, 0xfe, 0xfe, 0xfe,
     0xfb, 0x102, 0x104, 0x102,
     0xfb, 0x101, 0x103, 0x101,
-    0xfb, 0xfa, 0x100, 0xfa
+    0xfb, 0xfa, 0x100, 0xfa,
+
+    # new defs start here
+
+    # x, D, U, UD,
+    # R, DR, UR, UDR,
+    # L, DL, UL, UDL,
+    # LR, DLR, ULR, UDLR
+
+    # house
+    0xc1, 0xc1, 0xba, 0xba,
+    0xc4, 0xc4, 0xba, 0xba,
+    0xc5, 0xc5, 0xba, 0xba,
+    0xc1, 0xc1, 0xba, 0xba
 )
 
 len_table_adapt_decor = len(table_adapt_decor)
@@ -129,7 +142,7 @@ def is_right_border(decor, x, y, dx, dy):
                 return True
         return False
     icon = decor[x * MAXCELY + y]
-    if (icon < 0x182 or icon > 0x18d) and icon != 400:
+    if (icon < 0x182 or icon > 0x18d) and icon != 0x190:
         return False
     return True
 
@@ -171,6 +184,10 @@ def adapt_mid_border(decor, x, y):
         icon = 0x15c
     elif 0x154 < icon < 0x15b:
         icon = 0x155
+    elif 0x182 <= icon <= 0x18d: # this and on are new
+        icon = 0x18c
+    elif 0xba <= icon <= 0xc5:
+        icon = 0xba
 
     if icon in table_adapt_decor:
         icon = table_adapt_decor[table_adapt_decor.index(icon) // 16 * 16 + num]
@@ -186,6 +203,12 @@ def adapt_mid_border(decor, x, y):
             icon = 0x16b
         elif icon == 0x155:
             icon = random.randrange(0x155, 0x15a + 1)
+        elif icon == 0x18c and random.random() < 0.1: # this and onward are new
+            icon = random.randrange(0x184, 0x187 + 1)
+        elif icon == 0xc1 and random.random() < 0.5:
+            icon = 0xc3
+        elif icon == 0xba:
+            icon = random.randrange(0xba, 0xc3 + 1)
 
     if icon == -1 or 0x107 < icon < 0x11b:
         num = 0b1111

@@ -1,5 +1,6 @@
 import struct, random, sb_gamecode
 from collections import Counter
+
 from PIL import Image
 from sb_types import *
 
@@ -187,11 +188,11 @@ def randomize_mob_speed(mobs, chance, speed_min, speed_max):
 
 def randomize_lift_types(mobs, chance):
 	if chance == 0.0: return
-	lift_types = (
+	lift_types = [
 		MobType.ASCENSEUR,
 		MobType.ASCENSEURs,
 		MobType.ASCENSEURsi
-	)
+	]
 	for mob in mobs:
 		if mob.type in lift_types and random.random() < chance:
 			mob.type = random.choice(lift_types)
@@ -234,12 +235,14 @@ def shuffle_block_themes(decor, mobs):
 		Theme.PALACE
 	)
 	len_themes_src = len(themes_src)
-	themes_dst = random.sample(themes_src, k = len_themes_src)
+	themes_dst = list(themes_src)
+	random.shuffle(themes_dst)
 
-	blocks_per_sem_per_theme = [[]] * len(Theme)
+	blocks_per_sem_per_theme = {}
 	for theme in Theme:
+		blocks_per_sem_per_theme[theme] = {}
 		for sem in BlockSem:
-			blocks_per_sem_per_theme[theme].insert(sem, [i for i, x in enumerate(block_semantics) if x == sem and block_themes[i] == theme])
+			blocks_per_sem_per_theme[theme][sem] = [i for i, x in enumerate(block_semantics) if x == sem and block_themes[i] == theme]
 	
 	for x in range(MAXCELX):
 		for y in range(MAXCELY):
@@ -253,7 +256,7 @@ def shuffle_block_themes(decor, mobs):
 						decor[i] = -1
 						continue
 					for attempts in range(len_themes_src):
-						if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) != 0:
+						if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) > 0:
 							decor[i] = random.choice(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem])
 							break
 						else:
@@ -298,9 +301,12 @@ def mirror(decor, big_decor, mobs, desc_file):
 	for x in range(MAXCELX):
 		for y in range(MAXCELY):
 			i = x * MAXCELY + y
-			if x < MAXCELX / 2:
+			if x < width / 2:
 				decor[i], decor[(width - x - 1) * MAXCELY + y] = decor[(width - x - 1) * MAXCELY + y], decor[i]
 				big_decor[i], big_decor[(width - x - 2) * MAXCELY + y] = big_decor[(width - x - 2) * MAXCELY + y], big_decor[i]
+			if big_decor[i] == 0xcb and x < MAXCELX - 1: # marine plant
+				big_decor[i] = -1
+				big_decor[i + MAXCELY] = 0xcb
 			if decor[i] in block_mirrors:
 				decor[i] = block_mirrors[decor[i]]
 

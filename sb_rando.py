@@ -10,15 +10,15 @@ RANDOMIZE_SOUNDS = False
 PROCESS_BACKGROUNDS = True
 PROCESS_MUSICS = True
 PROCESS_MISSIONS = True
-SEED = 1
+SEED = 0
 
-import random, sb_util, shutil
+import random, sb_util, shutil, sys
 from pathlib import Path
 from PIL import Image
 from enum import *
 
-# sb_util.audit_block_data()
-# exit()
+#sb_util.audit_block_data()
+#exit()
 
 class MissionType(Enum):
     NORMAL = 0
@@ -32,19 +32,29 @@ def randomize_blupi_color():
     masked = Image.open('assets/blupi-masked.png').convert('RGBA')
     sheet = Image.open('assets/blupi000.png').convert('RGBA')
     overlay = Image.open('assets/blupi-overlay.png').convert('RGBA')
+    button = Image.open('assets/button00.png').convert('RGBA')
 
-    bands = list(masked.split())
+    blupi_bands = list(masked.split())
     colors = []
     for i in range(4):
-        bands_i = bands.copy()
+        bands_i = blupi_bands.copy()
+
+        button_masked = Image.open(f'assets/button00-masked{i}.png')
+        button_bands = list(button_masked.split())
+
         colors.append((random.random(), random.random(), random.random()))
         for j in range(3):
             bands_i[j] = bands_i[j].point(lambda x: x * colors[i][j])
-
+            button_bands[j] = button_bands[j].point(lambda x: x * colors[i][j])
         masked_new = Image.merge('RGBA', bands_i)
         sheet_new = Image.alpha_composite(sheet, masked_new)
         sheet_new.alpha_composite(overlay)
         sheet_new.save(f'game/image/blupi{i:03d}.bmp')
+
+        button_masked_new = Image.merge('RGBA', button_bands)
+        button.alpha_composite(button_masked_new)
+    button.save('game/image/button00.bmp')
+    button.close()
     overlay.close()
     sheet.close()
     masked.close()
@@ -103,8 +113,10 @@ def apply_mission_modifiers(data, mission_type, needs_key_goal, num_musics, num_
     sb_util.pack(data, decor, big_decor, mobs, desc_file)
 
 def main():
-    if SEED != 0:
-        random.seed(SEED)
+    seed = SEED
+    if seed == 0:
+        seed = random.randrange(sys.maxsize)
+    random.seed(seed)
 
     mission_pool = []
     training_pool = []
@@ -135,7 +147,7 @@ def main():
 
     randomize_blupi_color()
 
-    for i in ('button00', 'bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
+    for i in ('bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
               'insert', 'jauge', 'little', 'map', 'movie', 'multi', 'music', 'name', 'object', 'read', 'region',
               'service', 'session', 'setup', 'stop', 'temp', 'text', 'write'):
         path = image_dir / f'{i}.bmp'
@@ -340,6 +352,7 @@ def main():
         print(f'\ndone with {total_missions} missions in {num_worlds} worlds')
     else:
         print(f'\ndone')
+    print(f'seed: {seed}')
 
 
 if __name__ == '__main__':
