@@ -10,7 +10,7 @@ RANDOMIZE_SOUNDS = False
 PROCESS_BACKGROUNDS = True
 PROCESS_MUSICS = True
 PROCESS_MISSIONS = True
-SEED = 0
+SEED = 1
 
 import random, sb_util, shutil
 from pathlib import Path
@@ -26,7 +26,6 @@ class MissionType(Enum):
     TRAINING = 2
     WORLD = 3
     FINAL = 4
-
 
 # noinspection PyTypeChecker
 def randomize_blupi_color():
@@ -68,35 +67,40 @@ def apply_mission_modifiers(data, mission_type, needs_key_goal, num_musics, num_
     if mission_type == MissionType.FINAL:
         mission_type = MissionType.NORMAL
 
-    sb_util.randomize_background(data, num_backgrounds)
+    decor, big_decor, mobs, desc_file = sb_util.unpack(data)
+
+    sb_util.randomize_background(desc_file, num_backgrounds)
 
     if mission_type == MissionType.NORMAL or (
-            mission_type == MissionType.TRAINING and sb_util.count_missions(data) == 0):
-        sb_util.randomize_music(data, num_musics)
+            mission_type == MissionType.TRAINING and sb_util.count_missions(decor) == 0):
+        sb_util.randomize_music(desc_file, num_musics)
 
-    sb_util.shuffle_block_themes(data)
+    sb_util.shuffle_block_themes(decor, mobs)
 
-    if mission_type != MissionType.TRAINING and random.random() < MIRROR_MISSION_CHANCE:  # hardcoded positions in training would break a mirrored level
-        sb_util.mirror(data)
+    # do not mirror training level because hardcoded positions would cause issues
+    if mission_type != MissionType.TRAINING and random.random() < MIRROR_MISSION_CHANCE:
+        sb_util.mirror(decor, big_decor, mobs, desc_file)
 
-    sb_util.resolve_block_connectivity(data)
+    sb_util.resolve_block_connectivity(decor)
 
     if mission_type == MissionType.NORMAL:
-        sb_util.randomly_replace_eggs_with_chests(data, REPLACE_EGG_WITH_CHEST_CHANCE)
+        sb_util.randomly_replace_eggs_with_chests(mobs, decor, REPLACE_EGG_WITH_CHEST_CHANCE)
 
-    sb_util.randomize_mob_speed(data, RANDOM_MOB_SPEED_CHANCE, MOB_SPEED_FACTOR_MIN, MOB_SPEED_FACTOR_MAX)
-    sb_util.randomize_lift_types(data, RANDOM_LIFT_TYPE_CHANCE)
-    sb_util.randomly_remove_eggs(data, REMOVE_EGG_CHANCE)
+    sb_util.randomize_mob_speed(mobs, RANDOM_MOB_SPEED_CHANCE, MOB_SPEED_FACTOR_MIN, MOB_SPEED_FACTOR_MAX)
+    sb_util.randomize_lift_types(mobs, RANDOM_LIFT_TYPE_CHANCE)
+    sb_util.randomly_remove_eggs(mobs, REMOVE_EGG_CHANCE)
 
     if mission_type in [MissionType.START, MissionType.WORLD] and GIVE_EGGS_IN_HUB:
-        sb_util.give_free_eggs(data)
+        sb_util.give_free_eggs(mobs, desc_file)
 
     if needs_key_goal:
-        sb_util.replace_arrow_with_key(data)
+        sb_util.replace_arrow_with_key(mobs)
     else:
-        sb_util.replace_key_with_arrow(data)
+        sb_util.replace_key_with_arrow(mobs)
 
-    # sb_util.preview(data)
+    #sb_util.preview(decor, desc_file)
+
+    sb_util.pack(data, decor, big_decor, mobs, desc_file)
 
 def main():
     if SEED != 0:
@@ -131,10 +135,10 @@ def main():
 
     randomize_blupi_color()
 
-    for i in ['button00', 'bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
+    for i in ('button00', 'bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
               'insert', 'jauge', 'little', 'map', 'movie', 'multi', 'music', 'name', 'object', 'read', 'region',
-              'service', 'session', 'setup', 'stop', 'temp', 'text', 'write']:
-        path = (image_dir / f'{i}.bmp')
+              'service', 'session', 'setup', 'stop', 'temp', 'text', 'write'):
+        path = image_dir / f'{i}.bmp'
         if not path.is_file():
             with Image.open(f'assets/{i}.png') as image:
                 image.save(path)
@@ -213,8 +217,8 @@ def main():
                 break
             for path in [x for x in subdir.iterdir() if x.is_file()]:
                 if path.suffix.lower() == '.mid':
-                    num = ((
-                                       num_musics + 32769) % 65536) - 32769  # cast to s16, further offset by 1 to match game's behavior
+                    # cast to s16, further offset by 1 to match game's behavior
+                    num = ((num_musics + 32769) % 65536) - 32769
                     num_str = f'{'-' if num < 0 else ''}{abs(num):03d}'  # printf format %.3d
                     shutil.copy(path, sound_dir / f'music{num_str}.mid')
                     num_musics += 1
@@ -238,7 +242,8 @@ def main():
                 if path.suffix.lower() == '.xch':
                     with open(path, 'rb') as file:
                         data = bytearray(file.read())
-                        if sb_util.count_goals(data) > 0:  # try to exclude multiplayer levels
+                        mobs = sb_util.get_mobs(data)
+                        if sb_util.count_goals(mobs) > 0:  # try to exclude multiplayer levels
                             mission_pool.append(path)
                 elif path.suffix.lower() == '.blp' and path.name.lower().startswith('world'):
                     mission_num = int(path.name[5:-4])
@@ -249,13 +254,15 @@ def main():
                     elif mission_num % 10 == 0:
                         with open(path, 'rb') as file:
                             data = bytearray(file.read())
-                            num_missions = sb_util.count_missions(data)
+                            decor = sb_util.get_decor(data)
+                            num_missions = sb_util.count_missions(decor)
                         if num_missions > 0:
                             world_pool.append(path)
                     else:
                         with open(path, 'rb') as file:
                             data = bytearray(file.read())
-                            if sb_util.count_goals(data) > 0:
+                            mobs = sb_util.get_mobs(data)
+                            if sb_util.count_goals(mobs) > 0:
                                 mission_pool.append(path)
 
         print(f'MISSION POOL {len(mission_pool)}')
@@ -287,7 +294,8 @@ def main():
         total_missions = 0
         with open(data_dir / 'world001.xch', 'rb') as start:
             data = bytearray(start.read())
-            num_worlds = sb_util.count_worlds(data)
+            decor = sb_util.get_decor(data)
+            num_worlds = sb_util.count_worlds(decor)
             print(f'{num_worlds} worlds to populate')
 
         for i in range(num_worlds):
@@ -303,7 +311,8 @@ def main():
                 world.seek(0)
                 if i > 0:
                     apply_mission_modifiers(data, MissionType.WORLD, False, num_musics, num_backgrounds)
-                num_missions = sb_util.count_missions(data)
+                decor = sb_util.get_decor(data)
+                num_missions = sb_util.count_missions(decor)
                 total_missions += num_missions
                 print(f'\t{num_missions} missions to populate')
                 world.write(data)

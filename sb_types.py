@@ -3,6 +3,7 @@ from enum import *
 MAXMOVEOBJECT = 200
 MAXCELX = 100
 MAXCELY = 100
+MAXBLUPI = 4
 
 block_mirrors = {
 	0x0f: 0x11,
@@ -152,7 +153,7 @@ class Channel(IntEnum):
 	BLUPI3 = 13
 	TEMP = 14
 
-block_themes = [
+block_themes = (
 	Theme.NONE,
 	*[Theme.TECH] * 29,
 	*[Theme.NONE] * 5,
@@ -188,9 +189,9 @@ block_themes = [
 	*[Theme.NONE] * 22,
 	*[Theme.PALACE] * 15,
 	*[Theme.NONE] * 40
-]
+)
 
-block_semantics = [
+block_semantics = (
 	*[BlockSem.FULL_BLOCK] * 15,
 	*[BlockSem.TRIANGLE_RIGHT] * 2,
 	*[BlockSem.TRIANGLE_LEFT] * 2,
@@ -258,10 +259,30 @@ block_semantics = [
 	BlockSem.FG_PILLAR,
 	*[BlockSem.FG_ARCH] * 4,
 	*[BlockSem.UNIQUE] * 37,
-]
+)
+
+class BlupiDir(IntEnum):
+	LEFT = 1
+	RIGHT = 2
 
 class Mob:
-	def __init__(self, type_, step_advance, step_recede, time_stop_start, time_stop_end, pos_start_x, pos_start_y, pos_end_x, pos_end_y, pos_current_x, pos_current_y, step, time, phase, channel, icon):
+	def __init__(self,
+				 type_,
+				 step_advance,
+				 step_recede,
+				 time_stop_start,
+				 time_stop_end,
+				 pos_start_x,
+				 pos_start_y,
+				 pos_end_x,
+				 pos_end_y,
+				 pos_current_x,
+				 pos_current_y,
+				 step,
+				 time,
+				 phase,
+				 channel,
+				 icon):
 		self.type = type_
 		self.stepAdvance = step_advance
 		self.stepRecede = step_recede
@@ -278,3 +299,30 @@ class Mob:
 		self.phase = phase
 		self.channel = channel
 		self.icon = icon
+
+class DescFile:
+	def __init__(self,
+				 maj_rev,
+				 min_rev,
+				 pos_decor_x,
+				 pos_decor_y,
+				 dim_decor_x,
+				 dim_decor_y,
+				 world,
+				 music,
+				 region,
+				 blupi_pos,
+				 blupi_dir,
+				 name):
+		self.majRev = maj_rev
+		self.minRev = min_rev
+		self.posDecorX = pos_decor_x
+		self.posDecorY = pos_decor_y
+		self.dimDecorX = dim_decor_x
+		self.dimDecorY = dim_decor_y
+		self.world = world
+		self.music = music
+		self.region = region
+		self.blupiPos = blupi_pos
+		self.blupiDir = blupi_dir
+		self.name = name
