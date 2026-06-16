@@ -7,8 +7,8 @@ def apply(exe_bytes, patch_name):
         patch = json.load(patch_file)
         if 'byte_sequences' in patch:
             for seq in patch['byte_sequences']:
-                old = bytes.fromhex(seq['old'])
-                new = bytes.fromhex(seq['new'])
+                old = bytes.fromhex(seq['old'].replace(' ', ''))
+                new = bytes.fromhex(seq['new'].replace(' ', ''))
                 found = exe_bytes.find(old)
                 if found == -1:
                     print(f'failed to apply patch "{patch['name'] or patch_name}". byte sequence not found: {seq['old']}')
