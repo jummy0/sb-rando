@@ -273,8 +273,7 @@ def shuffle_block_themes(decor, mobs):
 				theme_idx = themes_src.index(theme)
 				sem = block_semantics[mob.icon]
 				if sem == BlockSem.FULL_BLOCK:
-					sem = BlockSem.FULL_LIFTpkill -f "blupi.exe"
-
+					sem = BlockSem.FULL_LIFT
 				attempts = 0
 				while attempts < len_themes_src:
 					if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) > 0:
