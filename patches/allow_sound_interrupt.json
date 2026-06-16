@@ -1,0 +1,10 @@
+{
+  "name": "Allow sound interrupt",
+  "description": "Allow sounds to self-interrupt (replay before the previous instance is complete)",
+  "byte_sequences": [
+    {
+      "old": "8b7c2420 8bd9 85ff",
+      "new": "8b7c2414 8bd9 85ff"
+    }
+  ]
+}

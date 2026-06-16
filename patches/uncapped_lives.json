@@ -1,0 +1,10 @@
+{
+  "name": "Uncapped lives",
+  "description": "Removes the 10 extra lives limit",
+  "byte_sequences": [
+    {
+      "old": "83bee4d800000a 0f8d86000000",
+      "new": "83bee4d800000a 909090909090"
+    }
+  ]
+}

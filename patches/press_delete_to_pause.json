@@ -1,0 +1,10 @@
+{
+  "name": "Press Delete to pause",
+  "description": "Enables the Delete key as an alias for the Pause-Break key",
+  "byte_sequences": [
+    {
+      "old": "060708090a0b101010101010",
+      "new": "060708090a0b101010101003"
+    }
+  ]
+}

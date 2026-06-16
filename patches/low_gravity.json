@@ -1,0 +1,70 @@
+{
+  "name": "Low gravity",
+  "description": "Reduce gravity by half",
+  "byte_sequences": [
+    {
+      "old": "8b9610d30000 8b442414 8d0c50",
+      "new": "8b9610d30000 8b442414 8d0c10"
+    },
+    {
+      "old": "c78610d30000f0ffffff eb0a",
+      "new": "c78610d30000e9ffffff eb0a"
+    },
+    {
+      "old": "c78610d30000f4ffffff 8b8ef4d20000",
+      "new": "c78610d30000efffffff 8b8ef4d20000"
+    },
+    {
+      "old": "bdf0ffffff 3bc3",
+      "new": "bde9ffffff 3bc3"
+    },
+    {
+      "old": "c78610d30000e3ffffff",
+      "new": "c78610d30000d7ffffff"
+    },
+    {
+      "old": "c78610d30000edffffff eb46",
+      "new": "c78610d30000e5ffffff eb46"
+    },
+    {
+      "old": "c78610d30000e7ffffff eb26",
+      "new": "c78610d30000ddffffff eb26"
+    },
+    {
+      "old": "c78610d30000edffffff eb1a",
+      "new": "c78610d30000e5ffffff eb1a"
+    },
+    {
+      "old": "c78610d30000f6ffffff",
+      "new": "c78610d30000f2ffffff"
+    },
+    {
+      "old": "c78610d30000efffffff e999000000",
+      "new": "c78610d30000e8ffffff e999000000"
+    },
+    {
+      "old": "c78610d30000f3ffffff e98a000000",
+      "new": "c78610d30000efffffff e98a000000"
+    },
+    {
+      "old": "c78610d30000e6ffffff eb58",
+      "new": "c78610d30000dbffffff eb58"
+    },
+    {
+      "old": "c78610d30000f4ffffff eb2c",
+      "new": "c78610d30000efffffff eb2c"
+    },
+    {
+      "old": "c78610d30000eaffffff eb06",
+      "new": "c78610d30000e0ffffff eb06"
+    },
+    {
+      "old": "c78610d30000f5ffffff 898ea0d30000",
+      "new": "c78610d30000f0ffffff 898ea0d30000"
+    },
+    {
+      "old": "83f8f2 7d4b",
+      "new": "83f8e8 7d4b"
+    }
+  ]
+}

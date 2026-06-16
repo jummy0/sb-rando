@@ -1,0 +1,14 @@
+{
+  "name": "Uncapped glue",
+  "description": "Removes the 10 glue limit",
+  "byte_sequences": [
+    {
+      "old": "83be90d300000a 0f8d8d000000",
+      "new": "83be90d300000a 909090909090"
+    },
+    {
+      "old": "899690d30000 3bc8 7e06",
+      "new": "899690d30000 3bc8 eb06"
+    }
+  ]
+}

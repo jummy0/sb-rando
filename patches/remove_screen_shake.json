@@ -1,0 +1,10 @@
+{
+  "name": "Remove screen shake",
+  "description": "Remove screen shake effects for explosions and wasp sting",
+  "byte_sequences": [
+    {
+      "old": "01000000 20000000 fcffffff 04000000",
+      "new": "00000000"
+    }
+  ]
+}

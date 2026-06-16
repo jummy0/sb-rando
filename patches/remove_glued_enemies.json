@@ -1,0 +1,10 @@
+{
+  "name": "Remove glued enemies",
+  "description": "Prevent defeated enemies from spawning a \"glued Blupi\" object",
+  "byte_sequences": [
+    {
+      "old": "6a01 83c006 6a37 83c502 6a22 50 55 8bcf e877eeffff",
+      "new": "9090 909090 9090 909090 9090 90 90 9090 9090909090"
+    }
+  ]
+}

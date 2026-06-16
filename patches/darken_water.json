@@ -1,0 +1,10 @@
+{
+  "name": "Darken water",
+  "description": "Darken water to reduce flickering",
+  "images": [
+    {
+      "base": "object.bmp",
+      "overlay": "darken_water_object.png"
+    }
+  ]
+}

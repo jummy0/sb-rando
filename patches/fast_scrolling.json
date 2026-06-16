@@ -1,0 +1,14 @@
+{
+  "name": "Fast scrolling",
+  "description": "The viewport scrolls faster to follow Blupi more responsively",
+  "byte_sequences": [
+    {
+      "old": "bb08000000 897c2410",
+      "new": "bb18000000 897c2410"
+    },
+    {
+      "old": "83e203 03c2 8bd8 c1fb02 83c308",
+      "new": "83e203 03c2 8bd8 c1fb02 83c318"
+    }
+  ]
+}

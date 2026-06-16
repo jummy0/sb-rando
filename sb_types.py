@@ -13,7 +13,8 @@ block_mirrors = {
 	0x58: 0x5a,
 	0x6e: 0x72,
 	0x7e: 0x81,
-	0x9a: 0x9b
+	0x9a: 0x9b,
+	0x191: 0x192,
 }
 
 for k in list(block_mirrors):
@@ -109,6 +110,7 @@ class BlockSem(IntEnum):
 	UPPER_QUARTER = 10
 	FULL_BLOCK_TOPPER = 11
 	SPECIAL_FULL = 12
+	FULL_LIFT = 13
 
 # noinspection DuplicatedCode
 class Theme(IntEnum):
@@ -350,10 +352,12 @@ block_semantics = (
 	*[BlockSem.UNIQUE] * 16,
 	*[BlockSem.FULL_BLOCK] * 3,
 	*[BlockSem.UNIQUE] * 29,
-	*[BlockSem.FULL_BLOCK] * 15,
+	*[BlockSem.FULL_BLOCK] * 14,
+	BlockSem.FULL_LIFT,
 	BlockSem.TRIANGLE_LEFT,
 	BlockSem.TRIANGLE_RIGHT,
-	*[BlockSem.FULL_BLOCK] * 2,
+	BlockSem.FULL_BLOCK,
+	BlockSem.FULL_LIFT,
 	*[BlockSem.UNIQUE] * 27,
 	BlockSem.FG_SECRET,
 	*[BlockSem.FULL_BLOCK] * 12,
@@ -374,9 +378,9 @@ block_semantics = (
 	*[BlockSem.FG_FRINGE] * 2,
 	*[BlockSem.UNIQUE] * 33,
 	BlockSem.FG_SECRET,
-	BlockSem.UNIQUE,
+	BlockSem.FULL_LIFT,
 	BlockSem.FG_SECRET,
-	BlockSem.UNIQUE,
+	BlockSem.FULL_LIFT,
 	*[BlockSem.FULL_BLOCK] * 23,
 	*[BlockSem.UNIQUE] * 11,
 	*[BlockSem.FG_ARCH] * 3,

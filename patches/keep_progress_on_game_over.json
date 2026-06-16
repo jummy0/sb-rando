@@ -1,0 +1,10 @@
+{
+  "name": "Keep progress on game over",
+  "description": "Prevent locking doors on game over",
+  "byte_sequences": [
+    {
+      "old": "c781e4d8000003000000 c1e81f",
+      "new": "c781e4d8000003000000 c3 9090"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Remove alternate death animations",
+  "description": "Disables random death animations",
+  "byte_sequences": [
+    {
+      "old": "83ffff 7506",
+      "new": "83ffff 9090"
+    }
+  ]
+}

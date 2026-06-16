@@ -1,0 +1,10 @@
+{
+  "name": "Fast teleport",
+  "description": "Reduce teleporter delay from 6.4 seconds to 1 second",
+  "byte_sequences": [
+    {
+      "old": "81be08d3000080000000",
+      "new": "81be08d3000014000000"
+    }
+  ]
+}

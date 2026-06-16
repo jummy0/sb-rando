@@ -1,0 +1,10 @@
+{
+  "name": "Fast mission start",
+  "description": "Reduce mission start delay from 2.5 seconds to 1 second",
+  "byte_sequences": [
+    {
+      "old": "83be00d300001e 7572 83be08d3000032",
+      "new": "83be00d300001e 7572 83be08d3000014"
+    }
+  ]
+}

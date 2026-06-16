@@ -6,13 +6,29 @@ REPLACE_EGG_WITH_CHEST_CHANCE = 0.2
 MIRROR_MISSION_CHANCE = 0.5
 REMOVE_EGG_CHANCE = 0.0
 GIVE_EGGS_IN_HUB = True
+RANDOMIZE_BLUPI_COLORS = True
 RANDOMIZE_SOUNDS = False
-PROCESS_BACKGROUNDS = True
-PROCESS_MUSICS = True
+PROCESS_BACKGROUNDS = False
+PROCESS_MUSICS = False
 PROCESS_MISSIONS = True
+APPLY_PATCHES = True
 SEED = 0
 
-import random, sb_util, shutil, sys
+enabled_patches = [
+    'allow_sound_interrupt',
+    'fast_teleport',
+    'fast_scrolling',
+    'fast_mission_start',
+    'fast_respawn',
+    'darken_water',
+    'keep_progress_on_game_over',
+    'killegg_0_lives',
+    'remove_glued_enemies',
+    'press_delete_to_pause',
+    'short_cheats',
+]
+
+import random, sb_util, sb_patch, shutil, sys
 from pathlib import Path
 from PIL import Image
 from enum import *
@@ -39,7 +55,7 @@ def randomize_blupi_color():
     for i in range(4):
         bands_i = blupi_bands.copy()
 
-        button_masked = Image.open(f'assets/button00-masked{i}.png')
+        button_masked = Image.open(f'assets/button00-masked{i}.png').convert('RGBA')
         button_bands = list(button_masked.split())
 
         colors.append((random.random(), random.random(), random.random()))
@@ -145,7 +161,8 @@ def main():
     assert image_dir is not None, "game image directory not found"
     assert sound_dir is not None, "game sound directory not found"
 
-    randomize_blupi_color()
+    if RANDOMIZE_BLUPI_COLORS:
+        randomize_blupi_color()
 
     for i in ('bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
               'insert', 'jauge', 'little', 'map', 'movie', 'multi', 'music', 'name', 'object', 'read', 'region',
@@ -172,18 +189,8 @@ def main():
         for i in range(93):
             shutil.copy(source_sounds.pop(0), sound_dir / f'sound{i:03d}.wav')
     else:
-        do_we_need_to_do_this = False
-
         for i in range(93):
-            path = sound_dir / f'sound{i}.wav'
-            if not path.is_file() or path.stat().st_size != (
-                    sound_source_dir / 'speedy-blupi' / path.name).stat().st_size:
-                do_we_need_to_do_this = True
-                break
-
-        if do_we_need_to_do_this:
-            for i in range(93):
-                shutil.copy(sound_source_dir / 'speedy-blupi' / f'sound{i:03d}.wav', sound_dir / f'sound{i:03d}.wav')
+            shutil.copy(sound_source_dir / 'speedy-blupi' / f'sound{i:03d}.wav', sound_dir / f'sound{i:03d}.wav')
 
     if PROCESS_BACKGROUNDS:
         print('processing backgrounds...')
@@ -350,9 +357,17 @@ def main():
             apply_mission_modifiers(data, MissionType.FINAL, False, num_musics, num_backgrounds)
             final.write(data)
         print(f'\ndone with {total_missions} missions in {num_worlds} worlds')
-    else:
-        print(f'\ndone')
-    print(f'seed: {seed}')
+        print(f'seed: {seed}')
+
+
+    if APPLY_PATCHES:
+        print('\npatching exe...')
+        with open('game/blupi.exe_base', 'rb') as exe_base:
+            data = bytearray(exe_base.read())
+            for patch in enabled_patches:
+                sb_patch.apply(data, patch)
+            with open('game/blupi.exe', 'wb') as exe:
+                exe.write(data)
 
 
 if __name__ == '__main__':

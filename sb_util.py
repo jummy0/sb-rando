@@ -255,10 +255,13 @@ def shuffle_block_themes(decor, mobs):
 					if sem == BlockSem.FG_FRINGE:
 						decor[i] = -1
 						continue
-					for attempts in range(len_themes_src):
+					attempts = 0
+					while attempts < len_themes_src:
 						if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) > 0:
 							decor[i] = random.choice(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem])
 							break
+						elif sem in (BlockSem.SPECIAL_FULL, BlockSem.TRIANGLE_LEFT, BlockSem.TRIANGLE_RIGHT, BlockSem.FULL_LIFT):
+							sem = BlockSem.FULL_BLOCK
 						else:
 							attempts += 1
 							theme_idx = (theme_idx + 1) % len_themes_src
@@ -269,10 +272,16 @@ def shuffle_block_themes(decor, mobs):
 			if theme in themes_src:
 				theme_idx = themes_src.index(theme)
 				sem = block_semantics[mob.icon]
-				for attempts in range(len_themes_src):
+				if sem == BlockSem.FULL_BLOCK:
+					sem = BlockSem.FULL_LIFTpkill -f "blupi.exe"
+
+				attempts = 0
+				while attempts < len_themes_src:
 					if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) > 0:
 						mob.icon = random.choice(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem])
 						break
+					elif sem in (BlockSem.SPECIAL_FULL, BlockSem.TRIANGLE_LEFT, BlockSem.TRIANGLE_RIGHT, BlockSem.FULL_LIFT):
+						sem = BlockSem.FULL_BLOCK
 					else:
 						attempts += 1
 						theme_idx = (theme_idx + 1) % len_themes_src
@@ -318,6 +327,9 @@ def mirror(decor, big_decor, mobs, desc_file):
 	blupi_x = desc_file.blupiPos[0][0]
 	blupi_x = (width - (desc_file.blupiPos[0][0] // 64) - 1) * 64 + blupi_x - (blupi_x // 64) * 64
 	desc_file.blupiPos[0][0] = blupi_x
+
+	if desc_file.dimDecorX > 0:
+		desc_file.posDecorX = max(0, min(blupi_x, 64 * MAXCELX - 640))
 
 	desc_file.blupiDir[0] = BlupiDir.LEFT if desc_file.blupiDir[0] == BlupiDir.RIGHT else BlupiDir.RIGHT
 

@@ -1,0 +1,16 @@
+{
+  "name": "Fast respawn",
+  "description": "Reduce respawn animation from 3 seconds to 1 second (will break things)",
+  "byte_sequences": [
+    {
+      "old": "c78618d900003c000000",
+      "new": "c78618d9000014000000"
+    }
+  ],
+  "sounds": [
+    {
+      "id": 9,
+      "new": "fast_respawn_sound009.wav"
+    }
+  ]
+}

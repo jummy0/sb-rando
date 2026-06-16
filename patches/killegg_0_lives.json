@@ -1,0 +1,10 @@
+{
+  "name": "KILLEGG sets lives to 0",
+  "description": "Make the KILLEGG cheat set lives to 0",
+  "byte_sequences": [
+    {
+      "old": "8b8d586d0000 48 50",
+      "new": "8b8d586d0000 6a00"
+    }
+  ]
+}
