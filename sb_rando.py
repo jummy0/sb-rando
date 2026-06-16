@@ -45,9 +45,9 @@ class MissionType(Enum):
 
 # noinspection PyTypeChecker
 def randomize_blupi_color():
-    masked = Image.open('assets/blupi-masked.png').convert('RGBA')
+    masked = Image.open('assets/blupi_masked.png').convert('RGBA')
     sheet = Image.open('assets/blupi000.png').convert('RGBA')
-    overlay = Image.open('assets/blupi-overlay.png').convert('RGBA')
+    overlay = Image.open('assets/blupi_overlay.png').convert('RGBA')
     button = Image.open('assets/button00.png').convert('RGBA')
 
     blupi_bands = list(masked.split())
@@ -55,7 +55,7 @@ def randomize_blupi_color():
     for i in range(4):
         bands_i = blupi_bands.copy()
 
-        button_masked = Image.open(f'assets/button00-masked{i}.png').convert('RGBA')
+        button_masked = Image.open(f'assets/button00_masked{i}.png').convert('RGBA')
         button_bands = list(button_masked.split())
 
         colors.append((random.random(), random.random(), random.random()))
@@ -77,8 +77,8 @@ def randomize_blupi_color():
 
     for i in ['init', 'win', 'lost']:
         bg = Image.open(f'assets/{i}.png').convert('RGBA')
-        bg_masked = Image.open(f'assets/{i}-masked.png').convert('RGBA')
-        bg_overlay = Image.open(f'assets/{i}-overlay.png').convert('RGBA')
+        bg_masked = Image.open(f'assets/{i}_masked.png').convert('RGBA')
+        bg_overlay = Image.open(f'assets/{i}_overlay.png').convert('RGBA')
         bg_masked_bands = list(bg_masked.split())
         for j in range(3):
             bg_masked_bands[j] = bg_masked_bands[j].point(lambda x: x * colors[0][j])
@@ -190,7 +190,7 @@ def main():
             shutil.copy(source_sounds.pop(0), sound_dir / f'sound{i:03d}.wav')
     else:
         for i in range(93):
-            shutil.copy(sound_source_dir / 'speedy-blupi' / f'sound{i:03d}.wav', sound_dir / f'sound{i:03d}.wav')
+            shutil.copy(sound_source_dir / 'speedy_blupi' / f'sound{i:03d}.wav', sound_dir / f'sound{i:03d}.wav')
 
     if PROCESS_BACKGROUNDS:
         print('processing backgrounds...')
