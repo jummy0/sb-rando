@@ -139,11 +139,11 @@ def main():
     world_pool = []
     start_pool = []
 
-    mission_source_dir = Path('./missions')
-    game_dir = Path('./game')
-    background_source_dir = Path('./backgrounds')
-    music_source_dir = Path('./musics')
-    sound_source_dir = Path('./sounds')
+    mission_source_dir = Path('missions')
+    game_dir = Path('game')
+    background_source_dir = Path('backgrounds')
+    music_source_dir = Path('musics')
+    sound_source_dir = Path('sounds')
     data_dir = None
     image_dir = None
     sound_dir = None

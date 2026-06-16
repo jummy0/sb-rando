@@ -3,7 +3,7 @@ from PIL import Image
 from pathlib import Path
 
 def apply(exe_bytes, patch_name):
-    with open(f'./patches/{patch_name}.json', 'r') as patch_file:
+    with open(f'patches/{patch_name}.json', 'r') as patch_file:
         patch = json.load(patch_file)
         if 'byte_sequences' in patch:
             for seq in patch['byte_sequences']:
