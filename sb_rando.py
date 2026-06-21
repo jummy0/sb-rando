@@ -8,10 +8,11 @@ REMOVE_EGG_CHANCE = 0.0
 GIVE_EGGS_IN_HUB = True
 RANDOMIZE_BLUPI_COLORS = True
 RANDOMIZE_SOUNDS = False
-PROCESS_BACKGROUNDS = False
-PROCESS_MUSICS = False
+PROCESS_BACKGROUNDS = True
+PROCESS_MUSICS = True
 PROCESS_MISSIONS = True
 APPLY_PATCHES = True
+RENDER_MISSION_MAPS = False
 SEED = 0
 
 enabled_patches = [
@@ -26,15 +27,18 @@ enabled_patches = [
     'remove_glued_enemies',
     'press_delete_to_pause',
     'short_cheats',
+    'disable_loading',
 ]
 
-import random, sb_util, sb_patch, shutil, sys
+import random, sb_util, sb_patch, shutil, sys, sb_pathing
 from pathlib import Path
 from PIL import Image
 from enum import *
 
 #sb_util.audit_block_data()
 #exit()
+
+to_render = {}
 
 class MissionType(Enum):
     NORMAL = 0
@@ -89,7 +93,7 @@ def randomize_blupi_color():
         bg.close()
         bg_masked.close()
 
-def apply_mission_modifiers(data, mission_type, needs_key_goal, num_musics, num_backgrounds):
+def apply_mission_modifiers(data, mission_type, mission_id, needs_key_goal, num_musics, num_backgrounds):
     if mission_type == MissionType.FINAL:
         mission_type = MissionType.NORMAL
 
@@ -124,9 +128,13 @@ def apply_mission_modifiers(data, mission_type, needs_key_goal, num_musics, num_
     else:
         sb_util.replace_key_with_arrow(mobs)
 
-    #sb_util.preview(decor, desc_file)
+    if mission_type == MissionType.NORMAL:
+        sb_pathing.add_chests(decor, big_decor, mobs, desc_file)
 
     sb_util.pack(data, decor, big_decor, mobs, desc_file)
+
+    if RENDER_MISSION_MAPS:
+        to_render[mission_id] = [decor, big_decor, mobs, desc_file]
 
 def main():
     seed = SEED
@@ -157,12 +165,25 @@ def main():
         elif name == 'sound':
             sound_dir = path
 
+    if image_dir is None:
+        image_dir = Path('game/image')
+        image_dir.mkdir()
+
+    if sound_dir is None:
+        sound_dir = Path('game/sound')
+        sound_dir.mkdir()
+
     assert data_dir is not None, "game data directory not found"
     assert image_dir is not None, "game image directory not found"
     assert sound_dir is not None, "game sound directory not found"
 
     if RANDOMIZE_BLUPI_COLORS:
         randomize_blupi_color()
+
+    if RENDER_MISSION_MAPS:
+        for path in [x for x in Path('maps').iterdir() if x.is_file()]:
+            if path.name.startswith('world') and path.suffix.lower() == '.png':
+                path.unlink()
 
     for i in ('bye', 'clear', 'create', 'element', 'explo', 'gamer', 'gread', 'gwrite', 'help', 'info',
               'insert', 'jauge', 'little', 'map', 'movie', 'multi', 'music', 'name', 'object', 'read', 'region',
@@ -298,7 +319,7 @@ def main():
         with open(data_dir / 'world001.xch', 'rb+') as start:
             data = bytearray(start.read())
             start.seek(0)
-            apply_mission_modifiers(data, MissionType.START, False, num_musics, num_backgrounds)
+            apply_mission_modifiers(data, MissionType.START, 1, False, num_musics, num_backgrounds)
             start.write(data)
 
         training_path = random.choice(training_pool)
@@ -307,7 +328,7 @@ def main():
         with open(data_dir / 'world010.xch', 'rb+') as training:
             data = bytearray(training.read())
             training.seek(0)
-            apply_mission_modifiers(data, MissionType.TRAINING, True, num_musics, num_backgrounds)
+            apply_mission_modifiers(data, MissionType.TRAINING, 10, True, num_musics, num_backgrounds)
             training.write(data)
 
         total_missions = 0
@@ -329,7 +350,7 @@ def main():
                 data = bytearray(world.read())
                 world.seek(0)
                 if i > 0:
-                    apply_mission_modifiers(data, MissionType.WORLD, False, num_musics, num_backgrounds)
+                    apply_mission_modifiers(data, MissionType.WORLD, (i + 1) * 10, False, num_musics, num_backgrounds)
                 decor = sb_util.get_decor(data)
                 num_missions = sb_util.count_missions(decor)
                 total_missions += num_missions
@@ -337,7 +358,7 @@ def main():
                 world.write(data)
 
             for j in range(num_missions):
-                dest_mission_name = f'world{(i + 1) * 10 + j + 1:03d}.xch'
+                dest_mission_name = f'world{i * 10 + j + 11:03d}.xch'
                 mission_path = mission_pool.pop(0)
                 print(f'\t{dest_mission_name} <-- {mission_path.relative_to(mission_source_dir)}')
                 shutil.copy(mission_path, data_dir / dest_mission_name)
@@ -345,7 +366,7 @@ def main():
                 with open(data_dir / dest_mission_name, 'rb+') as mission:
                     data = bytearray(mission.read())
                     mission.seek(0)
-                    apply_mission_modifiers(data, MissionType.NORMAL, j == num_missions - 1, num_musics, num_backgrounds)
+                    apply_mission_modifiers(data, MissionType.NORMAL, i * 10 + j + 11, j == num_missions - 1, num_musics, num_backgrounds)
                     mission.write(data)
 
         final_path = mission_pool.pop(0)
@@ -354,7 +375,7 @@ def main():
         with open(data_dir / 'world199.xch', 'rb+') as final:
             data = bytearray(final.read())
             final.seek(0)
-            apply_mission_modifiers(data, MissionType.FINAL, False, num_musics, num_backgrounds)
+            apply_mission_modifiers(data, MissionType.FINAL, 199, False, num_musics, num_backgrounds)
             final.write(data)
         print(f'\ndone with {total_missions} missions in {num_worlds} worlds')
         print(f'seed: {seed}')
@@ -368,6 +389,12 @@ def main():
                 sb_patch.apply(data, patch)
             with open('game/blupi.exe', 'wb') as exe:
                 exe.write(data)
+
+    if RENDER_MISSION_MAPS:
+        print('\nrendering mission previews...\nthis may take a while; the game can be played in the meantime')
+        for k, v in to_render.items():
+            sb_util.render_preview(v[0], v[1], v[2], v[3]).save(f'maps/world{k:03d}.png')
+        print('done')
 
 
 if __name__ == '__main__':

@@ -1,8 +1,11 @@
 import struct, random, sb_gamecode
 from collections import Counter
 
-from PIL import Image
+from PIL import Image, ImageDraw
 from sb_types import *
+
+DRAW_EMPTY_MOBS = False
+FIX_EMPTY_MOB_GRAPHICS = True
 
 def get_decor_as_2d_list(data):
 	decor = []
@@ -255,6 +258,8 @@ def shuffle_block_themes(decor, mobs):
 					if sem == BlockSem.FG_FRINGE:
 						decor[i] = -1
 						continue
+					elif sem == BlockSem.FULL_LIFT:
+						sem = BlockSem.FULL_BLOCK
 					attempts = 0
 					while attempts < len_themes_src:
 						if len(blocks_per_sem_per_theme[themes_dst[theme_idx]][sem]) > 0:
@@ -301,7 +306,7 @@ def scramble_block_themes(decor, mobs):
 
 def audit_block_data():
 	for i in range(len(block_themes)):
-		print(f'{i:03x}  {block_themes[i].name:10} {block_semantics[i].name:20}')
+		print(f'{i:03x}  {block_themes[i].name:10} {block_semantics[i].name:15} {blocks_solid[i]}')
 
 def mirror(decor, big_decor, mobs, desc_file):
 	width = 10 if desc_file.dimDecorX == 0 else MAXCELX
@@ -332,20 +337,217 @@ def mirror(decor, big_decor, mobs, desc_file):
 
 	desc_file.blupiDir[0] = BlupiDir.LEFT if desc_file.blupiDir[0] == BlupiDir.RIGHT else BlupiDir.RIGHT
 
-def preview(decor, desc_file):
-	image = Image.new('RGB', (64 * MAXCELX, 64 * MAXCELY), (0, 0, 255))
-	sheet = Image.open('game/image/object.bmp')
-	blupi = Image.open('assets/blupi000.png').crop((120, 0, 180, 60))
+def render_preview(decor, big_decor, mobs, desc_file):
+	mob_icons = [
+		-1,	-1, 0x0c, 0x30, 0x3a, 0x02, 0x15, 0x21,
+		-1, -1, -1, -1, -1, 0x44, -1, -1,
+		0x46, 0x54, -1, 0x59, 0x5a, 0x7c, -1, 0xb0,
+		0x82, 0x90, -1, -1, 0xa7, 0xb1, 0xb2, -1,
+		0x110, 0xee, 0xa8, -1, -1, 0x28, -1, -1,
+		0xbb, -1, -1, -1, 0xc3, -1, 0xd0, -1,
+		-1, 0xd4, 0xdb, 0xe2, -1, -1, 0xf4, 0xfc,
+		0xfd, -1, -1,
+		*[-1] * 31,
+		-1, -1, -1, -1, -1,
+		0x100, 0x100, -1, -1, -1,
+		*[-1] * 100,
+		0x101, 0x101, 0x101, 0x101
+	]
+	empty_mob_icon_pairs = {
+		0x2e: 0x02, # treasure
+		0x2f: 0x02,
+		0x30: 0x02,
+		0x31: 0x02,
+		0x32: 0x02,
+		0x33: 0x02,
+		0x34: 0x02,
+		0x35: 0x02,
+		0x36: 0x02,
+		0x37: 0x02,
+		0x38: 0x02,
+		0x39: 0x02,
+
+		0x3b: 0x0c, # bomb
+		0x3c: 0x0c,
+		0x3d: 0x0c,
+		0x3e: 0x0c,
+		0x3f: 0x0c,
+		0x40: 0x0c,
+		0x41: 0x0c,
+		0x42: 0x0c,
+
+		0x44: 0x15, # egg
+		0x45: 0x15,
+		0x46: 0x15,
+		0x47: 0x15,
+		0x48: 0x15,
+		0x49: 0x15,
+		0x4a: 0x15,
+
+		0x4b: 0x21,  # goal
+		0x4c: 0x21,
+		0x4d: 0x21,
+		0x4e: 0x21,
+		0x4f: 0x21,
+		0x50: 0x21,
+		0x51: 0x21,
+		0x52: 0x21,
+
+		0x61: 0x30, # hanging bomb
+		0x62: 0x30,
+		0x63: 0x30,
+		0x64: 0x30,
+		0x65: 0x30,
+		0x66: 0x30,
+		0x67: 0x30,
+		0x68: 0x30,
+
+		0x90: 0x44, # helicopter
+
+		0xb3: 0x45, # moving bomb
+
+		0xb6: 0x54, # somewhere in this range moving bomb transitions to fish
+		0xb7: 0x54,
+		0xb8: 0x54,
+		0xb9: 0x54,
+		0xba: 0x54,
+		0xbb: 0x54,
+		0xbc: 0x54,
+		0xbd: 0x54,
+		0xbe: 0x54,
+		0xbf: 0x54,
+		0xc0: 0x54,
+		0xc1: 0x54,
+		0xc2: 0x54,
+		0xc3: 0x54,
+
+		0xd2: 0x59, # jeep
+
+		0x151: 0x82, # skateboard
+
+	}
+	image = Image.new('RGBA', (64 * MAXCELX, 64 * MAXCELY), (0, 0, 255, 255))
+	boxes = Image.new('RGBA', (64 * MAXCELX, 64 * MAXCELY))
+	lines = Image.new('RGBA', (64 * MAXCELX, 64 * MAXCELY))
+	box_draw = ImageDraw.Draw(boxes)
+	line_draw = ImageDraw.Draw(lines)
+	obj = Image.open('assets/object.png').convert('RGBA')
+	blupi = Image.open('assets/blupi000.png').convert('RGBA')
+	blupi1 = Image.open('assets/blupi001.png').convert('RGBA')
+	blupi2 = Image.open('assets/blupi002.png').convert('RGBA')
+	blupi3 = Image.open('assets/blupi003.png').convert('RGBA')
+	element = Image.open('assets/element.png').convert('RGBA')
+	explo = Image.open('assets/explo.png').convert('RGBA')
+	for i in (obj, blupi, blupi1, blupi2, blupi3, element, explo):
+		i_px = i.load()
+		mask = Image.new('1', i.size, 1)
+		mask_px = mask.load()
+		for x in range(i.size[0]):
+			for y in range(i.size[1]):
+				if i_px[x, y] == (0, 0, 255, 255):
+					mask_px[x, y] = 0
+		i.putalpha(mask)
+	start_blupi = []
+	for i in (blupi, blupi1, blupi2, blupi3):
+		start_blupi.append(i.crop((120, 0, 180, 60)))
+	secret = obj.crop((384, 832, 448, 896))
+
+	for x in range(MAXCELX):
+		for y in range(MAXCELY):
+			i = x * MAXCELY + y
+			tile = big_decor[i]
+			if 0 <= tile <= 0x62:
+				tile_image = explo.crop((144 * (tile % 16), 144 * (tile // 16), 144 * (tile % 16) + 144, 144 * (tile // 16) + 144))
+				image.alpha_composite(tile_image, (x * 64, y * 64))
+
 	for x in range(MAXCELX):
 		for y in range(MAXCELY):
 			i = x * MAXCELY + y
 			tile = decor[i]
-			if 0 <= tile <= 0x1b8:
-				tile_image = sheet.crop((64 * (tile % 16), 64 * (tile // 16), 64 * (tile % 16) + 64, 64 * (tile // 16) + 64))
-				image.paste(tile_image, (x * 64, y * 64))
-	blupi_pos = desc_file.blupiPos[0]
-	image.paste(blupi, blupi_pos)
-	blupi.close()
-	sheet.close()
-	image.show()
-	input('Press enter to continue...')
+			if 0 <= tile <= 0x3ff:
+				tile_image = obj.crop((64 * (tile % 16), 64 * (tile // 16), 64 * (tile % 16) + 64, 64 * (tile // 16) + 64))
+				image.alpha_composite(tile_image, (x * 64, y * 64))
+
+	for mob in mobs:
+		if mob.type != MobType.NONE or DRAW_EMPTY_MOBS:
+			fixed_blupi_channel_empty_mob = False
+			mob_image = None
+			x_index = mob.icon % 16
+			y_index = mob.icon // 16
+			if mob.type <= MobType.BOMBEPERSO4:
+				if mob_icons[mob.type] != -1:
+					x_index = mob_icons[mob.type] % 16
+					y_index = mob_icons[mob.type] // 16
+			else:
+				print(f'wtf mob type {mob.type}')
+			if mob.channel == Channel.ELEMENT:
+				mob_image = element.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+			elif mob.channel == Channel.BLUPI:
+				if FIX_EMPTY_MOB_GRAPHICS and mob.type == MobType.NONE:
+					if mob.icon in empty_mob_icon_pairs:
+						icon = empty_mob_icon_pairs[mob.icon]
+						x_index = icon % 16
+						y_index = icon // 16
+						mob_image = element.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+						fixed_blupi_channel_empty_mob = True
+					else:
+						mob_image = blupi.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+				else:
+					mob_image = blupi.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+			elif mob.channel == Channel.OBJECT:
+				mob_image = obj.crop((64 * x_index, 64 * y_index, 64 * x_index + 64, 64 * y_index + 64))
+			elif mob.channel == Channel.BLUPI1:
+				mob_image = blupi1.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+			elif mob.channel == Channel.BLUPI2:
+				mob_image = blupi2.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+			elif mob.channel == Channel.BLUPI3:
+				mob_image = blupi3.crop((60 * x_index, 60 * y_index, 60 * x_index + 60, 60 * y_index + 60))
+			else:
+				if mob.type != MobType.NONE:
+					print(f'mob {mob.type} used weird channel {mob.channel}')
+				mob_image = secret #obj.crop((0, 0, 64, 64))
+			image.alpha_composite(mob_image, (mob.posStartX, mob.posStartY))
+			if mob.type == MobType.CAISSE and not mob.icon in (0x20, 0x21, 0x22):
+				image.alpha_composite(secret, (mob.posStartX, mob.posStartY))
+			if mob.posStartX != mob.posEndX or mob.posStartY != mob.posEndY:
+				start_box = (
+					mob.posStartX, mob.posStartY,
+					mob.posStartX + mob_image.size[0], mob.posStartY + mob_image.size[1]
+				)
+				end_box = (
+					mob.posEndX, mob.posEndY,
+					mob.posEndX + mob_image.size[0], mob.posEndY + mob_image.size[1]
+				)
+				line = (
+					mob.posStartX + mob_image.size[0] / 2, mob.posStartY + mob_image.size[1] / 2,
+					mob.posEndX + mob_image.size[0] / 2, mob.posEndY + mob_image.size[1] / 2
+				)
+				box_color = (255, 0, 0) if mob.type == MobType.NONE else (255, 255, 0)
+				line_color = (255, 0, 0) if mob.type == MobType.NONE else (255, 255, 255)
+				box_draw.rectangle(start_box, None, box_color, 3)
+				#box_draw.rectangle(end_box, None, (255, 255, 0), 3)
+				line_draw.line(line, (0, 0, 0), 8)
+				line_draw.line(line, line_color, 4)
+				line_draw.circle((line[2], line[3]), 10, line_color, (0, 0, 0), 2)
+			if mob.type == MobType.NONE:
+				circle_color = (0, 128, 0)
+				if mob.channel == Channel.BLUPI:
+					if fixed_blupi_channel_empty_mob:
+						print(f'empty mob at ({mob.posStartX},{mob.posStartY}) uses CHBLUPI icon {mob.icon:03x}')
+						circle_color = (0, 255, 255)
+					else:
+						print(f'UNFIXED empty mob at ({mob.posStartX},{mob.posStartY}) uses CHBLUPI icon {mob.icon:03x}')
+						circle_color = (255, 0, 0)
+				elif mob.icon != 0 and mob.channel != -12851:
+					print(f'empty mob at ({mob.posStartX},{mob.posStartY}) uses CH{mob.channel.name if hasattr(mob.channel, 'name') else mob.channel} icon {mob.icon:03x}')
+				line_draw.circle((mob.posStartX + mob_image.size[0] / 2, mob.posStartY + mob_image.size[1] / 2), 30, None, circle_color, 5)
+	image.alpha_composite(boxes)
+	image.alpha_composite(lines)
+
+	for i in range(4):
+		pos = desc_file.blupiPos[3 - i]
+		image.alpha_composite(start_blupi[3 - i], (pos[0], pos[1]))
+
+	for i in (obj, blupi, blupi1, blupi2, blupi3, element, explo):
+		i.close()
+	return image

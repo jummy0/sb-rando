@@ -327,7 +327,7 @@ block_semantics = (
 	*[BlockSem.TRIANGLE_LEFT] * 2,
 	BlockSem.TRIANGLE_RIGHT,
 	*[BlockSem.TRIANGLE_LEFT] * 2,
-	BlockSem.FG_ARCH,
+	BlockSem.FG_SECRET,
 	*[BlockSem.SPECIAL_FULL] * 2,
 	BlockSem.UPPER_HALF,
 	*[BlockSem.SPECIAL_FULL] * 2,
@@ -453,3 +453,50 @@ block_semantics = (
 	BlockSem.FG_SECRET,
 	BlockSem.UNIQUE,
 )
+
+blocks_solid = (
+	*[True] * 22, # 000 - 015
+	False, # 016
+	*[True] * 45, # 017 - 044
+	*[False] * 6, # 045 - 049
+	*[True] * 2, # 04a - 04b
+	*[False] * 2, # 04c - 04d
+	*[True] * 7, # 04e - 054
+	*[False] * 2, # 055 - 056
+	*[True] * 4, # 057 - 05a
+	*[False] * 16, # 05b - 06a
+	*[True] * 3, # 06b - 06d
+	*[False] * 16, # 06e - 07d
+	*[True] * 12, # 07e - 089
+	False, # 08a
+	*[True] * 19, # 08b - 09d
+	*[False] * 28, # 09e - 0b9
+	*[True] * 12, # 0ba - 0c5
+	*[False] * 11, # 0c6 - 0d0
+	*[True] * 26, # 0d1 - 0ea
+	*[False] * 11, # 0eb - 0f5
+	*[True] * 18, # 0f6 - 107
+	*[False] * 19, # 108 - 11a
+	*[True] * 2, # 11b - 11c
+	*[False] * 16, # 11d - 12c
+	True, # 12d
+	*[False] * 2, # 12e - 12f
+	True, # 130
+	*[False] * 6, # 131 - 136
+	*[True] * 6, # 137 - 13c
+	*[False] * 7, # 13d - 143
+	*[True] * 13, # 144 - 150
+	False, # 151
+	True, # 152
+	False, # 153
+	*[True] * 27, # 156 - 16e
+	*[False] * 6, # 16f - 174
+	*[True] * 2, # 175 - 176
+	*[False] * 11, # 177 - 181
+	*[True] * 12, # 182 - 18d
+	*[False] * 23, # 18e - 1a4
+	*[True] * 20, # 1a5 - 1b8
+	# custom
+	*[False, True] * 30, # 1b9 - 1f3
+)
+len_blocks_solid = len(blocks_solid)

@@ -4,3 +4,4 @@ game/GLCache/*
 game/data/*.blp
 game/data/*.xch
 game/debug.txt
+previews/*
